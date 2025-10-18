@@ -85,3 +85,25 @@ def fetch_tasks_from_the_last_fifteen_days():
         ),
         200,
     )
+
+
+@tasks_bp.route("/tasks/completed", methods=["GET"])
+@auth_required
+def fetch_completed_tasks():
+    connection = get_connection()
+    cursor = connection.cursor(dictionary=True)
+    auth_user = request.user["id"]
+
+    cursor.execute("""
+        SELECT 
+            priority, 
+            COUNT(*) AS count
+        FROM completed_tasks
+        WHERE user_id = %s
+        GROUP BY priority;
+    """, (auth_user,))
+
+    data = cursor.fetchall()
+    print(data)
+
+    return return_200_response("Successfully fetched priority counts", data)
