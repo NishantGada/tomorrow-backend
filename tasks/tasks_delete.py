@@ -6,10 +6,9 @@ from auth.helper_functions import auth_required
 from . import tasks_bp
 
 
-@tasks_bp.route("/task/<task_id>", methods=["DELETE"])
+@tasks_bp.route("/task/<string:task_id>", methods=["DELETE"])
 @auth_required
 def delete_task(task_id):
-    data = request.get_json()
     connection = get_connection()
     cursor = connection.cursor(dictionary=True)
 
@@ -35,5 +34,5 @@ def delete_task(task_id):
         )
     
     finally:
-            cursor.close()
-            connection.close()
+        cursor.close()
+        connection.close()
