@@ -3,6 +3,7 @@ import uuid
 
 from config.dbconfig import get_connection
 from auth.helper_functions import is_duplicate_email, auth_required
+from helper_functions import return_200_response
 from . import tasks_bp
 
 
@@ -12,7 +13,7 @@ def register():
     data = request.get_json()
     connection = get_connection()
     cursor = connection.cursor()
-    
+
     auth_user = request.user["id"]
     print("auth_user: ", auth_user)
 
@@ -24,12 +25,7 @@ def register():
         """
         cursor.execute(
             query,
-            (
-                task_id, 
-				data.get("title"), 
-				data.get("description"), 
-				data.get("priority")
-            ),
+            (task_id, data.get("title"), data.get("description"), data.get("priority")),
         )
 
         user_task_id = str(uuid.uuid4())
@@ -47,8 +43,6 @@ def register():
         )
 
         connection.commit()
-        cursor.close()
-        connection.close()
 
         return (
             jsonify(
@@ -66,3 +60,51 @@ def register():
             jsonify({"success": False, "message": e}),
             500,
         )
+
+    finally:
+        cursor.close()
+        connection.close()
+
+
+@tasks_bp.route("/task/done", methods=["POST"])
+@auth_required
+def mark_task_done():
+    try:
+        data = request.get_json()
+        connection = get_connection()
+        cursor = connection.cursor()
+
+        print("data: ", data)
+
+        auth_user = request.user["id"]
+
+        id = str(uuid.uuid4())
+        query = """
+            INSERT INTO completed_tasks (id, user_id, task_id, title, description, priority) 
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(
+            query,
+            (
+                id,
+                auth_user,
+                data.get("task_id"),
+                data.get("title"),
+                data.get("description"),
+                data.get("priority"),
+            ),
+        )
+
+        connection.commit()
+
+        return return_200_response("Task Marked Done successfully!", {})
+
+    except Exception as e:
+        return (
+            jsonify({"success": False, "message": e}),
+            500,
+        )
+
+    finally:
+        cursor.close()
+        connection.close()
