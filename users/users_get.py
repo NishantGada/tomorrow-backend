@@ -22,18 +22,20 @@ def get_all_users():
     }), 200
 
 
-@users_bp.route("/user/<string:id>", methods=["GET"])
-def get_user_by_id(id):
+@users_bp.route("/user", methods=["GET"])
+@auth_required
+def get_user_by_id():
     connection = get_connection()
     cursor = connection.cursor(dictionary=True)
+    auth_user = request.user["id"]
 
-    cursor.execute("SELECT * FROM users WHERE id = %s", (id,))
+    cursor.execute("SELECT * FROM users WHERE id = %s", (auth_user,))
     user = cursor.fetchone()
 
     return jsonify({
         "success": True, 
         "message": "User fetched successfully", 
         "data": {
-            "users": user,
+            "user": user,
         }
     }), 200
