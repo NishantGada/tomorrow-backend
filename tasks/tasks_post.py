@@ -74,7 +74,6 @@ def mark_task_done():
         connection = get_connection()
         cursor = connection.cursor()
 
-        print("data: ", data)
 
         auth_user = request.user["id"]
 

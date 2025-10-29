@@ -16,7 +16,6 @@ def get_tasks_by_user_id():
 
     cursor.execute("SELECT task_id FROM user_tasks WHERE user_id = %s", (auth_user,))
     task_ids = cursor.fetchall()
-    print("task_ids: ", task_ids)
 
     tasks = []
 
@@ -66,7 +65,6 @@ def fetch_tasks_from_the_last_fifteen_days():
         (auth_user,),
     )
     task_ids = cursor.fetchall()
-    print("task_ids: ", task_ids)
 
     tasks = []
 
